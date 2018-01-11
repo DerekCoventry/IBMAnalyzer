@@ -1,0 +1,65 @@
+import json
+from watson_developer_cloud import ToneAnalyzerV3
+#ignorelist = ()
+trump_analysis = {'Anger':0, 'Fear':0, 'Joy':0, 'Sadness':0, 'Analytical':0, 'Confident':0, 'Tentative':0}
+clinton_analysis = {'Anger':0, 'Fear':0, 'Joy':0, 'Sadness':0, 'Analytical':0, 'Confident':0, 'Tentative':0}
+mod = {'Anger':-1, 'Fear':-1, 'Joy':+1, 'Sadness':-1, 'Analytical':+1, 'Confident':+1, 'Tentative':-1}
+
+clintonJson = {}
+trumpJson = {}
+
+trump = "She's raising the money from the people she wants to control. Doesn't work that way. But when I started this campaign, I started it very strongly. It's called Make America Great Again. We're going to make America great. We have a depleted military. It has to be helped, has to be fixed. We have the greatest people on Earth in our military. We don't take care of our veterans. We take care of illegal immigrants, people that come into the country illegally, better than we take care of our vets. That can't happen. Our policemen and women are disrespected. We need law and order, but we need justice, too. Our inner cities are a disaster. You get shot walking to the store. They have no education. They have no jobs. I will do more for African-Americans and Latinos than she can ever do in 10 lifetimes. All she's done is talk to the African-Americans and to the Latinos, but they get the vote, and then they come back, they say, we'll see you in four years. We are going to make America strong again, and we are going to make America great again, and it has to start now. We cannot take four more years of Barack Obama, and that's what you get when you get her."
+trumpJson['text'] = trump
+trump_data = json.dumps(trumpJson)
+
+clinton = "Well, I would like to say to everyone watching tonight that I'm reaching out to all Americans Democrats, Republicans, and independents because we need everybody to help make our country what it should be, to grow the economy, to make it fairer, to make it work for everyone. We need your talents, your skills, your commitments, your energy, your ambition. You know, I've been privileged to see the presidency up close. And I know the awesome responsibility of protecting our country and the incredible opportunity of working to try to make life better for all of you. I have made the cause of children and families really my life's work. That's what my mission will be in the presidency. I will stand up for families against powerful interests, against corporations. I will do everything that I can to make sure that you have good jobs, with rising incomes, that your kids have good educations from preschool through college. I hope you will give me a chance to serve as your president."
+clintonJson['text'] = clinton
+clinton_data = json.dumps(clintonJson)
+tone_analyzer = ToneAnalyzerV3(
+  version='2017-09-21',
+  username='3f987916-1fd2-4be5-afeb-19c8db64b06b',
+  password='myOIKfoodgiJ'
+)
+
+trump_tone = tone_analyzer.tone(trump_data)
+clinton_tone = tone_analyzer.tone(clinton_data)
+
+#with open('tone.json') as tone_json:
+#  tone = tone_analyzer.tone(tone_json.read())
+
+doc_tone_trump = trump_tone['document_tone']
+doc_tone_clinton = clinton_tone['document_tone']
+#print(json.dumps(doc_tone_trump, indent=2))
+#print(json.dumps(doc_tone_clinton, indent=2))
+#(json.dumps(tone, indent=2))
+
+tones = doc_tone_trump['tones']
+for tone in tones:
+	trump_analysis[tone['tone_name']] = tone['score']
+tones = doc_tone_clinton['tones']
+for tone in tones:
+	clinton_analysis[tone['tone_name']] = tone['score']
+trump_score = 0
+clinton_score = 0
+#print doc_tone_trump
+#print doc_tone_clinton
+for tone in trump_analysis:
+	if trump_analysis[tone] > clinton_analysis[tone]:
+		trump_score += mod[tone]
+	if trump_analysis[tone] < clinton_analysis[tone]:
+		clinton_score += mod[tone]
+print trump_score, clinton_score
+if trump_score > clinton_score:
+	print "Trump wins"
+elif trump_score < clinton_score:
+	print "Clinton wins"
+else:
+	print "Draw"
+
+
+
+
+
+
+
+
